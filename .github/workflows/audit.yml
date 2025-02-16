@@ -15,4 +15,4 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Scan for vulnerabilities
-        uses: actions-rs/audit-check@v1
+        uses: actions-rust-lang/audit@v1
