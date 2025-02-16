@@ -10,8 +10,7 @@ use zero2prod::run;
 // main purpose is code generation (compiler do this)
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
-    let listener = TcpListener::bind("http://127.0.0.1:8000")
-        .expect("Failed to bind port 8000");
+    let listener = TcpListener::bind("http://127.0.0.1:8000").expect("Failed to bind port 8000");
     run(listener)?.await
 }
 

@@ -18,8 +18,7 @@ pub fn run(listner: TcpListener) -> Result<Server, std::io::Error> {
     // 1. listening where? (TCP socket 127.0.0.1:8000)
     // 2. maximum number of concurrent connections
     // 3. enable TLS (transport layer security)?
-    let server = HttpServer::new( || {
-
+    let server = HttpServer::new(|| {
         // Application - App
         // logics (routing, middlewares, request handlers, etc.)
         // take request (input) spit to response
@@ -32,11 +31,10 @@ pub fn run(listner: TcpListener) -> Result<Server, std::io::Error> {
             // Route combines a handler with a set of guards
             // Guards. request match conditions passed over handler (trait : Guard::check)
             // `web::get()` <- short-cut for `Route::new().guard(Guard::Get())`
-
+            
             // 새 요청이 들어오면 route에서 돌면서 `path`와 `guard` 모두를 만족시키는 하나를 찾음
             // .route("/", web::get().to(greet))
             // .route("/{name}", web::get().to(greet))
-
             .route("/health_check", web::get().to(health_check))
     })
     .listen(listner)?
