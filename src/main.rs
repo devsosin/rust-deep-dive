@@ -1,10 +1,14 @@
-use actix_web::{web, App, HttpRequest, HttpServer, Responder};
+use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 
 // Responder trait implementor (strings, status codes, bytes, HttpResponse, ...)
 // 해당 signatures를 꼭 따라야 하는 것은 아님 (특히 input에서)
 async fn greet(req: HttpRequest) -> impl Responder {
     let name = req.match_info().get("name").unwrap_or("World");
     format!("Hello {}!", &name)
+}
+
+async fn health_check() -> impl Responder {
+    HttpResponse::Ok()
 }
 
 
@@ -38,6 +42,8 @@ async fn main() -> Result<(), std::io::Error> {
             // 새 요청이 들어오면 route에서 돌면서 `path`와 `guard` 모두를 만족시키는 하나를 찾음
             .route("/", web::get().to(greet))
             .route("/{name}", web::get().to(greet))
+
+            .route("/health_check", web::get().to(health_check))
     })
     .bind("127.0.0.1:8000")?
     .run()
