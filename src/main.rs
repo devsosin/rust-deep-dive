@@ -1,3 +1,5 @@
+use std::net::TcpListener;
+
 use zero2prod::run;
 
 // Async Programming in Rust is build on top of Future trait
@@ -8,7 +10,9 @@ use zero2prod::run;
 // main purpose is code generation (compiler do this)
 #[tokio::main]
 async fn main() -> Result<(), std::io::Error> {
-    run()?.await
+    let listener = TcpListener::bind("http://127.0.0.1:8000")
+        .expect("Failed to bind port 8000");
+    run(listener)?.await
 }
 
 // cargo expand

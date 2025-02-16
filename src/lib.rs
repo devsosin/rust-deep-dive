@@ -1,9 +1,10 @@
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
 use actix_web::dev::Server;
+use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use std::net::TcpListener;
 
 // Responder trait implementor (strings, status codes, bytes, HttpResponse, ...)
 // 해당 signatures를 꼭 따라야 하는 것은 아님 (특히 input에서)
-async fn greet(req: HttpRequest) -> impl Responder {
+async fn _greet(req: HttpRequest) -> impl Responder {
     let name = req.match_info().get("name").unwrap_or("World");
     format!("Hello {}!", &name)
 }
@@ -12,7 +13,7 @@ async fn health_check() -> impl Responder {
     HttpResponse::Ok()
 }
 
-pub fn run() -> Result<Server, std::io::Error> {
+pub fn run(listner: TcpListener) -> Result<Server, std::io::Error> {
     // Server - HttpServer -> server application backbone
     // 1. listening where? (TCP socket 127.0.0.1:8000)
     // 2. maximum number of concurrent connections
@@ -38,7 +39,7 @@ pub fn run() -> Result<Server, std::io::Error> {
 
             .route("/health_check", web::get().to(health_check))
     })
-    .bind("127.0.0.1:8000")?
+    .listen(listner)?
     .run();
 
     Ok(server)
