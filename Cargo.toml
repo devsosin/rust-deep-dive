@@ -1,8 +1,26 @@
 [package]
 name = "zero2prod"
 version = "0.1.0"
+authors = ["sosin <sosincomp@gmail.com>"]
 edition = "2021"
 
+[lib]
+# any path, but convention
+# name : specify library name (default: package.name)
+path = "src/lib.rs"
+
+# double square brackets (array in TOML's syntax)
+# only one lib, but multiple binaries
+[[bin]]
+path = "src/main.rs"
+name = "zero2prod"
+
+# cargo add actix-web@4
+# cargo add tokio@1 --features macros,rt-multi-thread
 [dependencies]
 actix-web = "4"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+# cargo add reqwest --dev
+[dev-dependencies]
+reqwest = "0.12.12"
