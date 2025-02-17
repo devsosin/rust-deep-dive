@@ -1,41 +1,31 @@
 use actix_web::dev::Server;
-use actix_web::{web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+use actix_web::{web, App, HttpResponse, HttpServer};
 use std::net::TcpListener;
 
-// Responder trait implementor (strings, status codes, bytes, HttpResponse, ...)
-// 해당 signatures를 꼭 따라야 하는 것은 아님 (특히 input에서)
-async fn _greet(req: HttpRequest) -> impl Responder {
-    let name = req.match_info().get("name").unwrap_or("World");
-    format!("Hello {}!", &name)
+// impl Responder에서 HttpResponse로 변경
+// 성능상 차이는 없고, 스타일적 선택임
+async fn health_check() -> HttpResponse {
+    HttpResponse::Ok().finish()
 }
 
-async fn health_check() -> impl Responder {
-    HttpResponse::Ok()
+// Extractor Path, Query, Json, Form
+// FromRequest trait implements - UrlEncoded &key=value / T : DeserializeOwned + 'static
+// Runtime에서 느리지 않음 *monomorphization (단일형화, 컴파일 타임 프로세스로 - 고유한 인스턴스화에 대해 다형성 함수가 많은 단일형 함수로 대체)
+#[derive(serde::Deserialize)]
+struct FormData {
+    email: String,
+    name: String,
+}
+
+async fn subscribe(_form: web::Form<FormData>) -> HttpResponse {
+    HttpResponse::Ok().finish()
 }
 
 pub fn run(listner: TcpListener) -> Result<Server, std::io::Error> {
-    // Server - HttpServer -> server application backbone
-    // 1. listening where? (TCP socket 127.0.0.1:8000)
-    // 2. maximum number of concurrent connections
-    // 3. enable TLS (transport layer security)?
     let server = HttpServer::new(|| {
-        // Application - App
-        // logics (routing, middlewares, request handlers, etc.)
-        // take request (input) spit to response
-        // builder pattern
         App::new()
-            // Endpoint - Route
-            // path, a string, can use /{name} for dynamic path segments
-            // route an instance of the Route struct
-
-            // Route combines a handler with a set of guards
-            // Guards. request match conditions passed over handler (trait : Guard::check)
-            // `web::get()` <- short-cut for `Route::new().guard(Guard::Get())`
-            
-            // 새 요청이 들어오면 route에서 돌면서 `path`와 `guard` 모두를 만족시키는 하나를 찾음
-            // .route("/", web::get().to(greet))
-            // .route("/{name}", web::get().to(greet))
             .route("/health_check", web::get().to(health_check))
+            .route("/subscriptions", web::post().to(subscribe))
     })
     .listen(listner)?
     .run();

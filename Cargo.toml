@@ -17,8 +17,10 @@ name = "zero2prod"
 
 # cargo add actix-web@4
 # cargo add tokio@1 --features macros,rt-multi-thread
+# cargo add serde@1 --features derive
 [dependencies]
 actix-web = "4"
+serde = { version = "1", features = ["derive"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 
 # cargo add reqwest --dev
