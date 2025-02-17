@@ -4,14 +4,19 @@ name: Rust
 # Trigger
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "3_newsletter" ]
   pull_request:
     # 아마 생성 시, 커밋 변경 시, 재오픈 시?
     types: [opened, synchronize, reopend]
-    branches: [ "main" ]
+    branches: [ "3_newsletter" ]
 
 env:
   CARGO_TERM_COLOR: always
+  SQLX_VERSION: 0.8.3
+  SQLX_FEATURES: "rustls,postgres"
+  APP_USER: app
+  APP_USER_PWD: secret
+  APP_DB_NAME: newsletter
 
 # 병렬적으로 처리되는 작업들 명시
 # runs-on에 있는 runner 환경에서 실행됨
@@ -21,6 +26,16 @@ jobs:
     name: Test
     # Containers run on Ubuntu (Linux OS)
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
 
     steps:
       # 코드를 CI서버로 내려받은 후 특정 브랜치로 전환
@@ -32,8 +47,30 @@ jobs:
       - name: Install the Rust toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
       
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli
+          --version=${{ env.SQLX_VERSION }}
+          --features ${{ env.SQLX_FEATURES }}
+          --no-default-features
+          --locked
+      
+      - name: Create app user in Postgres
+        run: |
+          sudo apt-get install postgresql-client
+
+          # Create the application user
+          CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PWD}';"
+          PGPASSWORD="password" psql -U "postgres" -h "localhost" -c ${CREATE_QUERY}
+
+          # Grant create db privileges to the app user
+          GRANT_QUERY="ALTER USER ${APP_USER} CREATEDB;"
+          PGPASSWORD="password" psql -U "postgres" -h "localhost" -c "${GRANT_QUERY}"
+      
       - name: Run tests
         run: cargo test
+      
+      - name: Check that queries are fresh
+        run: cargo sqlx prepare --workspace --check -- --all-targets
 
   fmt: 
     name: Rustfmt
@@ -52,6 +89,9 @@ jobs:
   clippy:
     name: Clippy
     runs-on: ubuntu-latest
+    env:
+      # test에서 캐시된 결과 가져다 사용 (CI 속도 향상시키기 위함)
+      SQLX_OFFLINE: true
     steps:
       - uses: actions/checkout@v4
 
@@ -66,6 +106,16 @@ jobs:
   coverage:
     name: Code coverage
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:14
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+
     steps:
       - uses: actions/checkout@v4
       
@@ -74,6 +124,28 @@ jobs:
         with:
           components: llvm-tools-preview
       
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli
+          --version=${{ env.SQLX_VERSION }}
+          --features ${{ env.SQLX_FEATURES }}
+          --no-default-features
+          --locked
+      
+      - name: Create app user in Postgres
+        run: |
+          sudo apt-get install postgresql-client
+
+          # Create the application user
+          CREATE_QUERY="CREATE USER ${APP_USER} WITH PASSWORD '${APP_USER_PWD}';"
+          PGPASSWORD="password" psql -U "postgres" -h "localhost" -c ${CREATE_QUERY}
+
+          # Grant create db privileges to the app user
+          GRANT_QUERY="ALTER USER ${APP_USER} CREATEDB;"
+          PGPASSWORD="password" psql -U "postgres" -h "localhost" -c "${GRANT_QUERY}"
+      
+      - name: Migrate database
+        run: SKIP_DOCKER=true ./scripts/init_db.sh
+
       - name: Install cargo-llvm-cov
         uses: taiki-e/install-action@cargo-llvm-cov
 
