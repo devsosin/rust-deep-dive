@@ -1,0 +1,19 @@
+version: "3.8"
+
+name: "zero2prod"
+
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=newsletter
+
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", " || exit 1"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
