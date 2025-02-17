@@ -20,8 +20,29 @@ name = "zero2prod"
 # cargo add serde@1 --features derive
 [dependencies]
 actix-web = "4"
+config = "0.15.8"
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
+
+# sqlx-cli는 데이터베이스 마이그레이션 도구
+# cargo install --version="~0.8" sqlx-cli \
+#     --no-default-features \
+#     --features rustls,postgres
+
+# cargo add sqlx --no-default-features --features runtime-tokio-rustls,macros,postgres,uuid,chrono,migrate
+# sqlx = { version = "0.8.3", default-features = false, features = ["runtime-tokio-rustls", "macros", "postgres", "uuid", "chrono", "migrate"] }
+[dependencies.sqlx]
+version = "0.8.3"
+default-features = false
+features = [
+    "runtime-tokio-rustls", # use tokio runtime (for feature), rustls as TLS backend
+    "macros", # sqlx::query!, sqlx::query_as!
+    "postgres", # unlock postgres-specific functionality
+    "uuid", # id / Uuid type / crate
+    "chrono", # subscribed_at / DateTime<T> type / crate
+    "migrate"
+]
+
 
 # cargo add reqwest --dev
 [dev-dependencies]
