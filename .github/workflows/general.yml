@@ -68,7 +68,7 @@ jobs:
       
       - name: Migrate database
         run: SKIP_DOCKER=true ./scripts/init_db.sh
-        
+
       - name: Run tests
         run: cargo test
       
@@ -146,6 +146,8 @@ jobs:
           GRANT_QUERY="ALTER USER ${APP_USER} CREATEDB;"
           PGPASSWORD="password" psql -U "postgres" -h "localhost" -c "${GRANT_QUERY}"
       
+      # 윈도우에서 작업하면 executable하게 설정되지 않음. github에서 permission denied 에러 발생
+      # git update-index --chmod=+x ./scripts/init_db.sh로 파일에 대한 권한 변경 후 실행
       - name: Migrate database
         run: SKIP_DOCKER=true ./scripts/init_db.sh
 
