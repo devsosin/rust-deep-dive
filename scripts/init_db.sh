@@ -19,7 +19,7 @@ APP_USER="${APP_USER:=app}"
 APP_USER_PWD="${APP_USER_PWD:=secret}"
 APP_DB_NAME="${APP_DB_NAME:=newsletter}"
 
-if [[ -z "${SKIP_DOCKER}"]]
+if [[ -z "${SKIP_DOCKER}" ]]
 then
     CONTAINER_NAME="postgres"
 
