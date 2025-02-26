@@ -69,6 +69,7 @@ jobs:
       - name: Migrate database
         run: SKIP_DOCKER=true ./scripts/init_db.sh
 
+      # cargo sqlx prepare -- --tests (offline 모드 시 실행해놓아야함)
       - name: Run tests
         run: cargo test
       
