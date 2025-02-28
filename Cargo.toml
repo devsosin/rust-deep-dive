@@ -18,10 +18,12 @@ name = "zero2prod"
 # cargo add actix-web@4
 # cargo add tokio@1 --features macros,rt-multi-thread
 # cargo add serde@1 --features derive
+# cargo add env_logger
 [dependencies]
 actix-web = "4"
 chrono = { version = "0.4.39", default-features = false, features = ["clock"] }
 config = "0.15.8"
+env_logger = "0.11.6"
 serde = { version = "1", features = ["derive"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 uuid = { version = "1", features = ["v4"] }
