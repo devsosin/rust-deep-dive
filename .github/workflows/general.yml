@@ -4,11 +4,11 @@ name: Rust
 # Trigger
 on:
   push:
-    branches: [ "3_newsletter" ]
+    branches: [ "4_telemetry" ]
   pull_request:
     # 아마 생성 시, 커밋 변경 시, 재오픈 시?
     types: [opened, synchronize, reopend]
-    branches: [ "3_newsletter" ]
+    branches: [ "4_telemetry" ]
 
 env:
   CARGO_TERM_COLOR: always
