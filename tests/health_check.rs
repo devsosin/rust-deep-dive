@@ -1,4 +1,4 @@
-use secrecy::{ExposeSecret, SecretString};
+use secrecy::SecretString;
 use sqlx::{Connection, Executor, PgConnection, PgPool};
 use std::net::TcpListener;
 use std::sync::LazyLock;
@@ -53,11 +53,11 @@ pub async fn configure_database(config: &DatabaseConfig) -> PgPool {
         db_name: "postgres".to_string(),
         port: config.port.to_owned(),
         host: config.host.to_string(),
+        require_ssl: false,
     };
-    let mut connection =
-        PgConnection::connect(matenance_settings.connection_string().expose_secret())
-            .await
-            .expect("Failed to connect to Postgres");
+    let mut connection = PgConnection::connect_with(&matenance_settings.connect_options())
+        .await
+        .expect("Failed to connect to Postgres");
 
     connection
         .execute(format!(r#"CREATE DATABASE "{}";"#, config.db_name).as_str())
@@ -65,7 +65,7 @@ pub async fn configure_database(config: &DatabaseConfig) -> PgPool {
         .expect("Failed to create database.");
 
     // Migrate db
-    let connection_pool = PgPool::connect(config.connection_string().expose_secret())
+    let connection_pool = PgPool::connect_with(config.connect_options())
         .await
         .expect("Failed to connect to Postgres.");
     sqlx::migrate!("./migrations")
